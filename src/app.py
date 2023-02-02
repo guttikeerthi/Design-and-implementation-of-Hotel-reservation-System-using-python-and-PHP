@@ -98,7 +98,7 @@ def dashboardpage():
 def requestroompage():
     return render_template('requestroom.html')
 
-@app.route('/requestroomform',methos=['post','get'])
+@app.route('/requestroomform',methods=['post','get'])
 def requestroomformpage():
     walletaddr=session['username']
     aadhar=request.form['aadhar']
