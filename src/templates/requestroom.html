@@ -1,10 +1,20 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
+        <style>
+            body{
+	            height:700px;
+	            background: linear-gradient(to bottom, #33ccff 0%, #ff99cc 100%)
+            }
+        </style>
+        <title>Request Room</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
-        <title>Home</title>
+        
     </head>
     <body>
 	    <font face="Arial Black">
@@ -29,41 +39,43 @@
 		        </table>
 		    </center>
 	    </font>
-	    <div class="container">
+        <br/><br/>
+        <div class="contianer col-md-4"></div>
+	    <div class="container col-md-4 center">
             <form action="/requestroomform" method="post">
 
                 <div class="form-group">
-                    <label>Enter Aadhar Number:</label>
-                    <input type="digits" name="aadhar" required=""/> 
+                    <label for="aadhar">Enter Aadhar Number:</label>
+                    <input type="digits" class="form-control" name="aadhar" required=""> 
                 </div>
 
                 <div class="form-group">
-                    <label>Enter City:</label>
-                    <input type="text" name="city" required="" /> 
+                    <label for="city">Enter City:</label>
+                    <input type="text" class="form-control" name="city" required="" > 
                 </div>
 
                 <div class="form-group">
-                    <label>Enter No of Rooms:</label> 
-                    <input type="number" name="noofrooms" required="" /> 
+                    <label for="noofrooms">Enter No of Rooms:</label> 
+                    <input type="number" class="form-control" name="noofrooms" required="" > 
                 </div>
                 
                 <div class="form-group">
-                    <label>Enter No of Days:</label> 
-                    <input type="number" name="noofdays" required="" /> 
+                    <label for="noofdays">Enter No of Days:</label> 
+                    <input type="number" class="form-control" name="noofdays" required="" > 
                 </div>
                 
                 <div class="form-group">
-                    <label>Enter Booking Date:</label> 
-                    <input type="text" name="date" required="" /> 
+                    <label for="date">Enter Booking Date:</label> 
+                    <input type="text" class="form-control" name="date" required="" > 
                 </div>
 
                 <div class="form-group">
-                    <label>Enter No of Adults:</label> 
-                    <input type="number" name="noofadults" required="" /> 
+                    <label for="noofadults">Enter No of Adults:</label> 
+                    <input type="number" class="form-control" name="noofadults" required="" > 
                 </div>
 
                 <div class="form-group">
-                    <input type="submit" value="Request Room" /> 
+                    <input type="submit" value="Request Room" > 
                 </div>
 
             </form>
