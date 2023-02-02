@@ -19,6 +19,20 @@ def connect_with_register(acc): #connecting to the register contract
     contract=web3.eth.contract(address=contract_address,abi=contract_abi) #passing contract address,abi
     return(contract,web3)
 
+def connect_with_rooms(acc): #connecting to the register contract
+    blockchain='http://127.0.0.1:7545'
+    web3=Web3(HTTPProvider(blockchain))
+    if acc==0:
+        acc=web3.eth.accounts[0]
+    web3.eth.defaultAccount=acc
+    artifact_path='../build/contracts/rooms.json' #loading artifact
+    contract_address=rooms_contract_address
+    with open(artifact_path) as f:
+        contract_json=json.load(f)
+        contract_abi=contract_json['abi'] #extracting abi
+    contract=web3.eth.contract(address=contract_address,abi=contract_abi) #passing contract address,abi
+    return(contract,web3)
+
 
 app=Flask(__name__)
 app.secret_key='a15sacet'
@@ -57,11 +71,52 @@ def loginuser():
     state=contract.functions.loginuser(username,int(password)).call() # view permission
     print(state)
     if(state==True):
-        return(render_template('Login.html',res='Valid Login'))
+        session['username']=username
+        return (redirect('/dashboard'))
     else:
         return(render_template('Login.html',res='Invalid Credentials'))
 
+@app.route('/dashboard')
+def dashboardpage():
+    data=[]
+    walletaddr=session['username']
+    contract,web3=connect_with_rooms(0)
+    _customers,_aadhars,_city,_noofrooms,_noofdays,_dates,_noofadults,_roomids=contract.functions.viewrequests().call()
+    for i in range(0,len(_customers)):
+        if(_customers[i]==walletaddr):
+            dummy=[]
+            dummy.append(walletaddr)
+            dummy.append(_noofadults[i])
+            dummy.append(_noofdays[i])
+            dummy.append(_noofrooms[i])
+            dummy.append(_dates[i])
+            dummy.append(_roomids[i])
+            data.append(dummy)
+    return render_template('dashboard.html',dashboard_data=data,l=len(data))
 
+@app.route('/requestroom')
+def requestroompage():
+    return render_template('requestroom.html')
+
+@app.route('/requestroomform',methos=['post','get'])
+def requestroomformpage():
+    walletaddr=session['username']
+    aadhar=request.form['aadhar']
+    city=request.form['city']
+    noofrooms=request.form['noofrooms']
+    noofdays=request.form['noofdays']
+    date=request.form['date']
+    noofadults=request.form['noofadults']
+    print(walletaddr,aadhar,city,noofrooms,noofdays,date,noofadults)
+    contract,web3=connect_with_rooms(0)
+    hash=contract.functions.roomrequest(walletaddr,aadhar,city,int(noofrooms),int(noofdays),date,noofadults).transact()
+    web3.eth.waitForTransactionReceipt(hash)
+    return (render_template('requestroom.html',res='Request Raised'))
+    
+@app.route('/logout')
+def logoutpage():
+    session['username']=None
+    return redirect('/')
 
 
 if __name__=="__main__":
