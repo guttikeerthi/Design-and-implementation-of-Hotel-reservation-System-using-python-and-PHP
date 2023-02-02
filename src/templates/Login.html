@@ -24,21 +24,31 @@ div{
 	</font>
 	<div>
 <br><br><br><br><br><br><br>
-<form name="Login" action="post">
+<form name="Login" action="/loginuser" method="post">
 <table align="center">
-<tr><th colspan="2">Login Page</th></tr>
-<tr><td>User Name:</td><td><input type="text" name="name"/></td></tr>
-<tr><td>Password:</td><td><input type="password" name="password" maxlength="6"/></td></tr>
-<tr><td colspan=2 align=center><input type="submit" value="submit"/><input type="reset" value="Reset Password"/></td></tr>
+	<tr>
+		<th colspan="2">Login Page</th>
+	</tr>
+	<tr>
+		<td>User Name:</td>
+		<td><input type="text" name="username"/></td>
+	</tr>
+	<tr>
+		<td>Password:</td>
+		<td><input type="password" name="password" maxlength="6"/></td>
+	</tr>
+	<tr>
+		<td colspan=2 align=center>
+			<input type="submit" value="Login"/>
+			<input type="reset" value="Reset Password"/>
+		</td>
+	</tr>
 <tr><td colspan="2">
-<?php
-if(isset($_REQUEST["name"])&&isset(REQUEST["password"]))
-{
-	$User Name=$_REQUEST["name"];
-	$Password=$_REQUEST["Password"];
-}
-?>
 </td></td>
+</tr>
+<tr>
+	<span style="color:red">{{res}}</span>
+</tr>
 </table>
 </form></div>
 </body>
