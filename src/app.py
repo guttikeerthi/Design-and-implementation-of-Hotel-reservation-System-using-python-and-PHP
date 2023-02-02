@@ -81,10 +81,11 @@ def dashboardpage():
     data=[]
     walletaddr=session['username']
     contract,web3=connect_with_rooms(0)
-    _customers,_aadhars,_city,_noofrooms,_noofdays,_dates,_noofadults,_roomids=contract.functions.viewrequests().call()
+    _roomreq,_customers,_aadhars,_city,_noofrooms,_noofdays,_dates,_noofadults,_roomids=contract.functions.viewrequests().call()
     for i in range(0,len(_customers)):
         if(_customers[i]==walletaddr):
             dummy=[]
+            dummy.append(_roomreq[i])
             dummy.append(walletaddr)
             dummy.append(_noofadults[i])
             dummy.append(_noofdays[i])
@@ -112,11 +113,138 @@ def requestroomformpage():
     hash=contract.functions.roomrequest(walletaddr,aadhar,city,int(noofrooms),int(noofdays),date,noofadults).transact()
     web3.eth.waitForTransactionReceipt(hash)
     return (render_template('requestroom.html',res='Request Raised'))
-    
+
 @app.route('/logout')
 def logoutpage():
     session['username']=None
     return redirect('/')
+
+@app.route('/admin')
+def adminloginpage():
+    return render_template('adminlogin.html')
+
+@app.route('/adminloginuser',methods=['POST'])
+def adminloginuser():
+    username=request.form['username']
+    password=request.form['password']
+    print(username,password)
+    contract,web3=connect_with_register(0)
+    state=contract.functions.loginadmin(username,int(password)).call()
+    if state==True:
+        return (redirect('/admindashboard'))
+    else:
+        return(render_template('adminlogin.html',err='invalid details'))
+
+@app.route('/admindashboard')
+def admindashboard():
+    data=[]
+    contract,web3=connect_with_rooms(0)
+    _roomreq,_customers,_aadhars,_city,_noofrooms,_noofdays,_dates,_noofadults,_roomids=contract.functions.viewrequests().call()
+    for i in range(0,len(_customers)):
+        if(_roomids[i][0]==0):
+            dummy=[]
+            dummy.append(_roomreq[i])
+            dummy.append(_aadhars[i])
+            dummy.append(_noofadults[i])
+            dummy.append(_noofdays[i])
+            dummy.append(_noofrooms[i])
+            dummy.append(_dates[i])
+            dummy.append(_city[i])
+            dummy.append(_customers[i])
+            data.append(dummy)
+    return render_template('admindashboard.html',dashboard_data=data,l=len(data))
+
+@app.route('/roomstatus',methods=['get','post'])
+def roomstatus():
+    data=[]
+    contract,web3=connect_with_rooms(0)
+    status=contract.functions.viewroomstatus().call()
+    for i in status:
+        dummy=[]
+        dummy.append(i)
+        if i==0:
+            dummy.append('Free')
+        else:
+            dummy.append('Filled')
+        data.append(dummy)
+    return(render_template('roomstatus.html',dashboard_data=data,l=len(data)))
+
+@app.route('/allocateroom',methods=['get','post'])
+def allocateroom():
+    data=[]
+    contract,web3=connect_with_rooms(0)
+    _roomreq,_customers,_aadhars,_city,_noofrooms,_noofdays,_dates,_noofadults,_roomids=contract.functions.viewrequests().call()
+    for i in range(0,len(_roomreq)):
+        if _roomids[i][0]==0:
+            dummy=[]
+            dummy.append(_roomreq[i])
+            data.append(dummy)
+
+    return render_template('allocateroom.html',dashboard_data=data,l=len(data))
+
+@app.route('/allocateroomform',methods=['post','get'])
+def allocateroomform():
+    requestid=request.form['requestid']
+    roomnos=request.form['roomnos']
+    roomnos=roomnos.split(',')
+    data=[]
+    for i in roomnos:
+        data.append(int(i))
+    print(data)
+    contract,web3=connect_with_rooms(0)
+    hash=contract.functions.allocateroom(int(requestid),data).transact()
+    web3.eth.waitForTransactionReceipt(hash)
+    return (redirect('/admindashboard'))
+
+@app.route('/vacateroom')
+def vacateroom():
+    data=[]
+    contract,web3=connect_with_rooms(0)
+    _roomreq,_customers,_aadhars,_city,_noofrooms,_noofdays,_dates,_noofadults,_roomids=contract.functions.viewrequests().call()
+    for i in range(len(_roomreq)):
+        if(_roomids[i][0]!=0 and _roomids[i][0]!=100):
+            dummy=[]
+            dummy.append(_roomreq[i])
+            data.append(dummy)
+    return render_template('vacateroom.html',dashboard_data=data,l=len(data))
+
+@app.route('/vacateroomform',methods=['get','post'])
+def vacateroomform():
+    requestid=request.form['requestid']
+    contract,web3=connect_with_rooms(0)
+    hash=contract.functions.vacateroom(int(requestid)).transact()
+    web3.eth.waitForTransactionReceipt(hash)
+    return (redirect('/admindashboard'))
+
+@app.route('/customersdirectory',methods=['post','get'])
+def customersdirectory():
+    contract,web3=connect_with_rooms(0)
+    _roomreq,_customers,_aadhars,_city,_noofrooms,_noofdays,_dates,_noofadults,_roomids=contract.functions.viewrequests().call()
+    data=[]
+    for i in range(len(_roomreq)):
+        
+        dummy=[]
+        dummy.append(_roomreq[i])
+        dummy.append(_customers[i])
+        dummy.append(_aadhars[i])
+        dummy.append(_city[i])
+        dummy.append(_noofrooms[i])
+        dummy.append(_noofdays[i])
+        dummy.append(_dates[i])
+        dummy.append(_noofadults[i])
+        if(_roomids[i][0]==100):
+            dummy.append('Vacated')
+        elif(_roomids[i][0]==0):
+            dummy.append('Request Not Confirmed')
+        else:
+            dummy.append(_roomids[i])
+        data.append(dummy)
+    
+    return render_template('customers.html',dashboard_data=data,l=len(data))
+
+@app.route('/adminlogout')
+def adminlogout():
+    return(redirect('/admin'))
 
 
 if __name__=="__main__":
