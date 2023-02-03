@@ -2,8 +2,8 @@ from flask import Flask,render_template,redirect,request,session
 from web3 import Web3,HTTPProvider
 import json
 
-register_contract_address='0x5bd3b7dedf32DE6F36EAC432E81bF38352B41A1a'
-rooms_contract_address='0x8a50a1eE77A9984eEeE21FC2B0c4c55715C296Ff'
+register_contract_address='0x9a32b5Bb59B836D8490Eaf3A2Dd83f45335838db'
+rooms_contract_address='0x7F50DCF03c43cCcF8343eDd4A70329a618aF90a5'
 
 def connect_with_register(acc): #connecting to the register contract
     blockchain='http://127.0.0.1:7545'
@@ -19,7 +19,7 @@ def connect_with_register(acc): #connecting to the register contract
     contract=web3.eth.contract(address=contract_address,abi=contract_abi) #passing contract address,abi
     return(contract,web3)
 
-def connect_with_rooms(acc): #connecting to the register contract
+def connect_with_rooms(acc): #connecting to the room contract
     blockchain='http://127.0.0.1:7545'
     web3=Web3(HTTPProvider(blockchain))
     if acc==0:
@@ -111,7 +111,7 @@ def requestroomformpage():
     print(walletaddr,aadhar,city,noofrooms,noofdays,date,noofadults)
     contract,web3=connect_with_rooms(0)
     hash=contract.functions.roomrequest(walletaddr,aadhar,city,int(noofrooms),int(noofdays),date,noofadults).transact()
-    web3.eth.waitForTransactionReceipt(hash)
+    web3.eth.waitForTransactionReceipt(hash) #storing data in the blockchain
     return (render_template('requestroom.html',res='Request Raised'))
 
 @app.route('/logout')
@@ -135,7 +135,7 @@ def adminloginuser():
     else:
         return(render_template('adminlogin.html',err='invalid details'))
 
-@app.route('/admindashboard')
+@app.route('/admindashboard') #display all the request raised by the customer
 def admindashboard():
     data=[]
     contract,web3=connect_with_rooms(0)
@@ -154,7 +154,7 @@ def admindashboard():
             data.append(dummy)
     return render_template('admindashboard.html',dashboard_data=data,l=len(data))
 
-@app.route('/roomstatus',methods=['get','post'])
+@app.route('/roomstatus',methods=['get','post']) #display room status
 def roomstatus():
     data=[]
     contract,web3=connect_with_rooms(0)
@@ -169,7 +169,7 @@ def roomstatus():
         data.append(dummy)
     return(render_template('roomstatus.html',dashboard_data=data,l=len(data)))
 
-@app.route('/allocateroom',methods=['get','post'])
+@app.route('/allocateroom',methods=['get','post']) #allocating rooms
 def allocateroom():
     data=[]
     contract,web3=connect_with_rooms(0)
@@ -216,7 +216,7 @@ def vacateroomform():
     web3.eth.waitForTransactionReceipt(hash)
     return (redirect('/admindashboard'))
 
-@app.route('/customersdirectory',methods=['post','get'])
+@app.route('/customersdirectory',methods=['post','get']) #display all customers
 def customersdirectory():
     contract,web3=connect_with_rooms(0)
     _roomreq,_customers,_aadhars,_city,_noofrooms,_noofdays,_dates,_noofadults,_roomids=contract.functions.viewrequests().call()
@@ -247,5 +247,5 @@ def adminlogout():
     return(redirect('/admin'))
 
 
-if __name__=="__main__":
+if __name__=="__main__": #running server
     app.run(debug=True,host='0.0.0.0',port=5001)
